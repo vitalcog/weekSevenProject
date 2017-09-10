@@ -1,0 +1,55 @@
+<!DOCTYPEhtml>
+<head>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<html>
+
+<body>
+  <header>Welcome to Babble
+  </header>
+
+  <section>
+
+    <div id="displayBlabs">
+
+        {{ #blabs }}
+            <div class="babbler">
+
+              <img src="/user_image/{{ user.user_pic }}">
+
+              {{ text_body }}
+
+              <!-- <form method="post" action="/checkYoLikes/:{{ id }}">
+                <input type="submit" value="{{ like_count }} likes">
+              </form> -->
+
+              <a href="/checkYoLikes/:{{ id }}"> {{ like_count }} likes </a>
+
+              <form method="post" action="/likeApost/{{ id }}">
+                <input type="submit" value="validate a babbler's feeling by giving them a like">
+              </form>
+
+              <form method="post" action="/killApost/{{ id }}">
+                <input type="submit" value="destroyThisPost">
+              </form>
+
+            </div>
+
+          {{ /blabs }}
+    </div>
+
+    <form method="post" action="/makeBlab">
+
+      <textarea rows="10" cols="25" name="blab"> </textarea>
+
+      <input type="submit" value="blab">
+
+    </form>
+  </section>
+
+  <form method="post" action="logout">
+    <input type="submit" value="log out">
+  </form>
+</body>
+
+</html>

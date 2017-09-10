@@ -1,0 +1,53 @@
+<!DOCTYPEhtml>
+<head>
+  <script src="dom.js" defer> </script>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<html>
+
+<body>
+
+  <section id="superCoolLoginAndRegister">
+
+<!-- Login Form -->
+  <div>
+
+    <h2>Log in and Start Babbling!
+    </h2>
+
+    <form id="loginForm" method="post" action="/loggedIn">
+
+      <input type="text" name="userName" placeholder="user name">
+
+      <input type="password" name="password" placeholder="password">
+
+      <div>
+        <input id="login" type="submit" value="login">
+
+        <button id="makeRegisterAppear"> Register </button>
+      </div>
+    </form>
+  </div>
+<!-- End Login Form -->
+
+
+<!-- Register Form -->
+  <div id="hiddenRegisterForm">
+
+    <h2> Sign Up and Babble With Your Friends!
+    </h2>
+
+    <form id="registerForm" method="post" action="/register">
+
+      <input type="text" name="userNameRegister" placeholder="user name">
+
+      <input type="password" name="passwordRegister" placeholder="password">
+
+      <input type="submit" value="Register New User">
+
+    </form>
+  </div>
+  </section>
+</body>
+
+</html>
