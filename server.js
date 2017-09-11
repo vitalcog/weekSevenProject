@@ -21,53 +21,77 @@ server.use(express.static('public'));
 
 server.use(parser.urlencoded( {extended: false} ) );
 
-server.use(session( {
+server.use(session({
   secret: 'yes',
   resave: false,
-  saveUninitialized: true
-}));
+  saveUninitialized: true,
+}))
 
 //    ---   |||   ---   \\
+
+// This function checks whether this request is from a valid user. If not it will destroy
+// the session.
+function checkInvalidate(req) {
+  return new Promise(function (success, fail) {
+    if (Date.now() - req.session.active > 30000) {
+      req.session.regenerate(function (err) {
+        if (err) {
+          fail(err);
+        } else {
+          console.log(chalk.bgRed('session timed out! Great Success!'));
+          success(); // done!
+        }
+      }); // end regenerate()
+    } else {
+      success(); // don't need to destroy, continue on
+    }
+  });
+}
 
 
 // GET COMMANDS SECTION
 
 // BEGIN MAIN PAGE
 server.get('/babble', function(req, res) {
-  if (req.session.user === undefined) {
-    res.redirect('/login');
-  }
-  else {
-    Message.findAll({
-      include: [{
-        model: User,
-      }],
-      order: [[ 'createdAt', 'asc']]
-    })
-    .then(function(blabs) {
-      res.render('main', {
-        blabs: blabs,
-      });
-    });
-  }
+  checkInvalidate(req).then(function () {
+      if (req.session.user === undefined) {
+        res.redirect('/login');
+      }
+      else {
+        Message.findAll({
+          include: [{
+            model: User,
+          }],
+          order: [[ 'createdAt', 'asc']]
+        })
+        .then(function(blabs) {
+          res.render('main', {
+            blabs: blabs,
+          });
+        });
+      }
+  });
 });
 // END MAIN PAGE
 
 
 // BEGIN LIKES PAGE
 server.get('/checkYoLikes/:message_id_number', function(req, res) {
-  Like.findAll( {include: [{ model: User }] },{where: {messageId: req.params.message_id_number} },)
-  .then(function(likedBy) {
-    res.render('likes', {
-      likedBy: likedBy
+  checkInvalidate(req).then(function() {
+    Like.findAll( {include: [User], where: {messageId: req.params.message_id_number }})
+    .then(function(likedBy) {
+      res.render('likes', {
+        likedBy: likedBy
+        });
       });
-    });
+  });
   });
 // END LIKES PAGE
 
 
 // BEGIN LOGIN
 server.get('/login', function(req, res) {
+  checkInvalidate(req);
   res.render('login');
 });
 // END LOGIN
@@ -106,14 +130,14 @@ server.post('/loggedIn', function(req, res) {
       req.session.active = Date.now();
 
 // SETS TIMEOUT FUNCTION TO DESTROY SESSION
-      setInterval(function() {
-        if (req.session !== undefined) {
-          if ( (Date.now() - req.session.active) > 60000) {
-            req.session.destroy();
-            console.log(chalk.bgRed('session timed out! Great Success!'));
-          }
-        }
-      }, 10000);
+      // setInterval(function() {
+      //   if (req.session !== undefined) {
+      //     if ( (Date.now() - req.session.active) > 60000) {
+      //       req.session.destroy();
+      //       console.log(chalk.bgRed('session timed out! Great Success!'));
+      //     }
+      //   }
+      // }, 10000);
 // END SET TIMEOUT
 
       res.redirect('/babble');
@@ -123,11 +147,14 @@ server.post('/loggedIn', function(req, res) {
     }
   });
 });
+
 // END LOG IN USER, VALIDATE PASSWORD AND CREATE SESSION
 
 
 //  CREATE A MESSAGE POST
 server.post('/makeBlab', function(req, res) {
+  checkInvalidate(req);
+
   if (req.session.user === undefined) {
     res.redirect('/login');
     return;
